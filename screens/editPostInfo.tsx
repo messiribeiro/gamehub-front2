@@ -47,7 +47,6 @@ const EditPostInfo = ({ navigation, route }: Props) => {
     const fetchUserId = async () => {
       try {
         const id = await AsyncStorage.getItem('userId');
-        console.log('uri do vídeo', photoUri);
         if (id) {
           setUserId(id);
         }
@@ -139,7 +138,6 @@ const EditPostInfo = ({ navigation, route }: Props) => {
       const fileInfo = await FileSystem.getInfoAsync(photoUri);
       if (fileInfo.exists) {
         const fileExtension = fileInfo.uri.split('.').pop()?.toLowerCase();
-        console.log('Extensão do arquivo:', fileExtension); // Verifique a extensão do arquivo
 
         let fileType = '';
         if (fileExtension === 'png') {
@@ -169,7 +167,6 @@ const EditPostInfo = ({ navigation, route }: Props) => {
       return;
     }
 
-    console.log('Caption:', caption);
 
     try {
       setIsSubmitting(true);
@@ -179,7 +176,6 @@ const EditPostInfo = ({ navigation, route }: Props) => {
         },
       });
 
-      console.log('Post criado com sucesso:', response.data);
       setPostSubmitted(true); // Define postSubmitted como true
       // Remova o listener de navegação
       if (unsubscribeRef.current) {

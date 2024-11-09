@@ -111,7 +111,6 @@ const ChatWindow = ({ navigation, route }: Props) => {
             receiverId: Number(receiverId),
             content: inputValue,
           });
-          console.log(response.data);
         } catch (err) {
           console.error('Erro ao enviar mensagem:', err);
           return null;
