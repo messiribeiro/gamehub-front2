@@ -25,7 +25,9 @@ import SignupStep1 from '../screens/signupStep1';
 import SignupStep2 from '../screens/signupStep2';
 import SignupStep3 from '../screens/signupStep3';
 import Support from '@/screens/supportPages/support';
-// Definindo o tipo de parâmetros das rotas
+import SetDonateAmount from '@/screens/supportPages/setDonateAmount';
+
+
 export type RootStackParamList = {
   TabNavigator: undefined;
   Modal: undefined;
@@ -57,7 +59,8 @@ export type RootStackParamList = {
   Dashboard: { from?: string };
   Payment: { type: string };
   Support: undefined;
-  MyGames: undefined
+  MyGames: undefined;
+  SetDonateAmount: undefined
 };
 
 // Criando o Stack Navigator
@@ -87,7 +90,7 @@ type RootStackProps = {
 export default function RootStack({ linking }: RootStackProps) {
   return (
     <NavigationContainer independent={true} linking={linking} theme={MyTheme}>
-      <Stack.Navigator initialRouteName="Support">
+      <Stack.Navigator initialRouteName="SetDonateAmount">
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep1" component={SignupStep1} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep2" component={SignupStep2} options={{ headerShown: false }} />
@@ -128,6 +131,7 @@ export default function RootStack({ linking }: RootStackProps) {
         <Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }} />
         <Stack.Screen name="Support" component={Support} options={{ headerShown: false }} />
         <Stack.Screen name="MyGames" component={MyGames} options={{ headerShown: false }} />
+        <Stack.Screen name="SetDonateAmount" component={SetDonateAmount} options={{ headerShown: false }} />
 
 
       </Stack.Navigator>
