@@ -24,6 +24,7 @@ import Login from '../screens/login';
 import SignupStep1 from '../screens/signupStep1';
 import SignupStep2 from '../screens/signupStep2';
 import SignupStep3 from '../screens/signupStep3';
+import MyGames from '@/screens/myGames';
 
 // Definindo o tipo de parâmetros das rotas
 export type RootStackParamList = {
@@ -56,6 +57,7 @@ export type RootStackParamList = {
   GamePreview: undefined;
   Dashboard: { from?: string };
   Payment: { type: string };
+  MyGames: undefined;
 };
 
 // Criando o Stack Navigator
@@ -85,7 +87,7 @@ type RootStackProps = {
 export default function RootStack({ linking }: RootStackProps) {
   return (
     <NavigationContainer independent={true} linking={linking} theme={MyTheme}>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="MyGames">
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep1" component={SignupStep1} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep2" component={SignupStep2} options={{ headerShown: false }} />
@@ -124,6 +126,8 @@ export default function RootStack({ linking }: RootStackProps) {
         <Stack.Screen name="GamePreview" component={GamePreview} options={{ headerShown: false }} />
         <Stack.Screen name="Payment" component={Payment} options={{ headerShown: false }} />
         <Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }} />
+        <Stack.Screen name="MyGames" component={MyGames} options={{ headerShown: false }} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
