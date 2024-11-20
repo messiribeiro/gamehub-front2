@@ -24,8 +24,8 @@ import Login from '../screens/login';
 import SignupStep1 from '../screens/signupStep1';
 import SignupStep2 from '../screens/signupStep2';
 import SignupStep3 from '../screens/signupStep3';
-import Support from '@/screens/supportPages/support';
-import SetDonateAmount from '@/screens/supportPages/setDonateAmount';
+import Support from '@/screens/donatePages/donate';
+import SetDonateAmount from '@/screens/donatePages/setDonateAmount';
 
 
 export type RootStackParamList = {
