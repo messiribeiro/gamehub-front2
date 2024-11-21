@@ -137,6 +137,10 @@ const MenuModal: React.FC<MenuProps> = ({ visible, onClose, navigation, userData
       </View>
 
       <View style={styles.pagesAndLogoutContainer}>
+      <TouchableOpacity style={styles.logoutView} onPress={()=> navigation.navigate("Settings")}>
+          <Feather name="settings" size={20} color="#fff" />
+          <Text style={styles.text}>Configurações</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.logoutView} onPress={handleLogout}>
           <Feather name="log-out" size={20} color="#fff" />
           <Text style={styles.text}>Sair</Text>
