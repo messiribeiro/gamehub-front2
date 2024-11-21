@@ -21,16 +21,21 @@ type Props = StackScreenProps<RootStackParamList, 'Search'>;
 const Search = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="#1B1B1E"/>
+     
+      <StatusBar backgroundColor="#1B1B1E" />
+      <View style={styles.header} >
+      <Feather onPress={()=>navigation.goBack()} style={styles.arrowLeft} name='arrow-left' size={24} color={"#FFF"} />
       <View style={styles.searchContainer}>
-      <TextInput
-              style={styles.input}
-              placeholder="Buscar por um usuário ou um jogo"
-              placeholderTextColor="#888"
-              
-      />
-      <Feather name='search' color={"#fff"} size={20} />
+        <TextInput
+                style={styles.input}
+                placeholder="Buscar por um usuário ou um jogo"
+                placeholderTextColor="#888"
+                
+        />
+        <Feather name='search' color={"#fff"} size={20} />
+        </View>
       </View>
+      
       <View style={styles.resultContainer}>
         <View style={styles.profile}>
         <Image
@@ -76,10 +81,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   resultContainer: {
-    marginTop: 20,
+    marginTop: 30,
     alignItems: "flex-start",
     width: "100%",
-    paddingHorizontal: 30
+    paddingHorizontal: 45
 
   },
   profile: {
@@ -95,6 +100,15 @@ const styles = StyleSheet.create({
   profileName: {
     color: "white",
     fontSize: 16,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 10
+  },
+  arrowLeft: {
+    top: 5,
   }
   
 });

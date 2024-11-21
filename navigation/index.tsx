@@ -100,7 +100,7 @@ type RootStackProps = {
 export default function RootStack({ linking }: RootStackProps) {
   return (
     <NavigationContainer independent={true} linking={linking} theme={MyTheme}>
-      <Stack.Navigator initialRouteName="Search">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep1" component={SignupStep1} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep2" component={SignupStep2} options={{ headerShown: false }} />
