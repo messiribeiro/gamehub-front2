@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   invite: {
     height: 40,
-    backgroundColor: '#656565',
+    backgroundColor: '#10C700',
     borderRadius: 10,
     marginTop: 30,
     display: 'flex',
@@ -287,6 +287,7 @@ const styles = StyleSheet.create({
   },
   inviteText: {
     color: 'white',
+    fontWeight: "700"
   },
   games: {
     flexDirection: 'row',

@@ -208,6 +208,8 @@ const Chat = ({ navigation }: Props) => {
           </View>
         )}
       </ScrollView>
+
+      
     </View>
   );
 };

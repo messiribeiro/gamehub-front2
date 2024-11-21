@@ -4,7 +4,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import * as FileSystem from 'expo-file-system';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
-import {MaterialIcons} from '@expo/vector-icons';
+import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'react-native';
 
 
@@ -51,43 +51,43 @@ const EditProfile: React.FC<Props> = ({ navigation, route }) => {
   useEffect(() => {
     // Atualizar a URL da imagem do perfil se a URI estiver disponível
     if (profilePictureUri) {
-      setProfilePictureUrl(profilePictureUri); 
+      setProfilePictureUrl(profilePictureUri);
     }
   }, [profilePictureUri]); // Dependência de profilePictureUri
 
   const handleSave = async () => {
     try {
       const userId = await AsyncStorage.getItem('userId');
-  
+
       if (!username) {
         Alert.alert('Erro', 'O campo Nome de usuário precisa ser preenchido.');
         return;
       }
-  
+
       // Criar FormData apenas se houver alterações
       const updateData = new FormData();
       let hasChanges = false;
-  
+
       if (username !== userData?.username) {
         updateData.append('username', username);
         hasChanges = true;
       }
-  
+
       if (bio !== userData?.bio) {
         updateData.append('bio', bio);
         hasChanges = true;
       }
-  
+
       // Verificar se a imagem do perfil deve ser atualizada
       if (profilePictureUri) {
         const isExternalUrl = profilePictureUrl.startsWith('http://') || profilePictureUrl.startsWith('https://');
-        
+
         if (!isExternalUrl) {
           const fileInfo = await FileSystem.getInfoAsync(profilePictureUrl);
           if (fileInfo.exists) {
             const fileExtension = fileInfo.uri.split('.').pop()?.toLowerCase();
             let fileType = '';
-  
+
             if (fileExtension === 'png') {
               fileType = 'image/png';
             } else if (fileExtension === 'jpeg' || fileExtension === 'jpg') {
@@ -96,13 +96,13 @@ const EditProfile: React.FC<Props> = ({ navigation, route }) => {
               console.error('Tipo de arquivo não suportado:', fileExtension);
               return;
             }
-  
+
             const file = {
               uri: fileInfo.uri,
               name: `profilePhotoByUser-${userId}.${fileExtension}`,
               type: fileType,
             };
-  
+
             updateData.append('profilePicture', file as any);
             hasChanges = true; // Marcar que houve uma alteração na imagem
           } else {
@@ -114,12 +114,12 @@ const EditProfile: React.FC<Props> = ({ navigation, route }) => {
           hasChanges = true; // Marcar que houve uma alteração na imagem externa
         }
       }
-  
+
       if (!hasChanges) {
         navigation.goBack();
         return;
       }
-  
+
       if (userId) {
         const response = await api.put(`/api/users/${userId}`, updateData, {
           headers: {
@@ -145,8 +145,8 @@ const EditProfile: React.FC<Props> = ({ navigation, route }) => {
       }
     }
   };
-  
-  
+
+
 
 
   const navigateToCamera = () => {
@@ -155,8 +155,13 @@ const EditProfile: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-              <StatusBar barStyle="dark-content" backgroundColor="#121212" />
-
+      <StatusBar barStyle="dark-content" backgroundColor="#121212" />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Editar perfil</Text>
+      </View>
       <View style={styles.photoContainer}>
         <Text style={styles.label}>Foto de Perfil</Text>
         <View style={styles.imageContainer}>
@@ -170,26 +175,28 @@ const EditProfile: React.FC<Props> = ({ navigation, route }) => {
         </View>
       </View>
 
-      <Text style={styles.label}>Nome de Usuário</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nome de usuário"
-        value={username}
-        onChangeText={setUsername}
-        placeholderTextColor={"white"}
+      <View style={styles.main} >
+        <Text style={styles.label}>Nome de Usuário</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Nome de usuário"
+          value={username}
+          onChangeText={setUsername}
+          placeholderTextColor={"white"}
 
-      />
-      <Text style={styles.label}>Bio</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Consigo jogar das 22h até às 3h da manhã..."
-        value={bio}
-        onChangeText={setBio}
-        placeholderTextColor={"white"}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Salvar Alterações</Text>
-      </TouchableOpacity>
+        />
+        <Text style={styles.label}>Bio</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Consigo jogar das 22h até às 3h da manhã..."
+          value={bio}
+          onChangeText={setBio}
+          placeholderTextColor={"white"}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleSave}>
+          <Text style={styles.buttonText}>Salvar Alterações</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -198,16 +205,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#121212',
-    padding: 30,
-    paddingTop: 70,
+    paddingTop: '3%',
+
   },
   photoContainer: {
     width: '100%',
     alignItems: 'center',
+
   },
   imageContainer: {
     position: 'relative',
     alignItems: 'center',
+
   },
   label: {
     color: 'white',
@@ -230,7 +239,7 @@ const styles = StyleSheet.create({
   cameraIcon: {
     position: 'absolute',
     bottom: '37%',
-    right: '8%',
+    right: '7%',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 50,
     padding: 5,
@@ -246,6 +255,26 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 40,
+    zIndex: 10
+  },
+  backButton: {
+    position: 'absolute',
+    left: 20,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  main: {
+    paddingHorizontal: 30,
+
+  }
 });
 
 export default EditProfile;
