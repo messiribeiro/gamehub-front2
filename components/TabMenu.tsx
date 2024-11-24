@@ -10,14 +10,14 @@ type Props = {
 const TabMenu: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity>
+      <TouchableOpacity  onPress={() => navigation.navigate('Search')}>
         <Feather name="compass" size={26} color="#000000" />
       </TouchableOpacity>
 
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('Camera')} >
         <Feather
           name="plus-circle"
-          onPress={() => navigation.navigate('Camera')}
+          
           size={26}
           color="#000000"
         />

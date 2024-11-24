@@ -20,6 +20,8 @@ import Payment from '../screens/payment';
 import Profile from '../screens/profile';
 import Subscribe from '../screens/subscribe';
 import Settings from '@/screens/settings/settings';
+import Search from '@/screens/search';
+
 
 import Login from '../screens/login';
 import SignupStep1 from '../screens/signupStep1';
@@ -68,7 +70,7 @@ export type RootStackParamList = {
   GameAnalytics: undefined;
   AddReward: undefined;
   Settings: undefined;
-
+  Search: undefined;
 };
 
 // Criando o Stack Navigator
@@ -143,6 +145,7 @@ export default function RootStack({ linking }: RootStackProps) {
         <Stack.Screen name="SetDonateAmount" component={SetDonateAmount} options={{ headerShown: false }} />
         <Stack.Screen name="AddReward" component={AddReward} options={{ headerShown: false }} />
         <Stack.Screen name="Settings" component={Settings} options={{ headerShown: false }} />
+        <Stack.Screen name="Search" component={Search} options={{ headerShown: false }} />
 
       </Stack.Navigator>
     </NavigationContainer>
