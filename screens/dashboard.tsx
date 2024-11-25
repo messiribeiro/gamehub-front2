@@ -174,9 +174,10 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   flatList: {},
+
   backButton: {
     position: 'absolute',
-    left: 20,
+    left: 0,
   },
   headerTitle: {
     fontSize: 20,

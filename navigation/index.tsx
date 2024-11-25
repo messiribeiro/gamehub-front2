@@ -21,7 +21,6 @@ import Profile from "../screens/profile";
 import Subscribe from "../screens/subscribe";
 import Settings from "@/screens/settings/settings";
 import GameProfile from "../screens/gameProfile";
-
 import Login from "../screens/login";
 import SignupStep1 from "../screens/signupStep1";
 import SignupStep2 from "../screens/signupStep2";
@@ -33,6 +32,7 @@ import SetDonateAmount from "@/screens/donate/setDonateAmount";
 import MyGames from "@/screens/myGames";
 import AddGames from "@/screens/addGames";
 import GameAnalytics from "@/screens/gameManager/gameAnalytics";
+import Search from "@/screens/search";
 
 export type RootStackParamList = {
   TabNavigator: undefined;
@@ -65,12 +65,13 @@ export type RootStackParamList = {
   Payment: { type: string };
   MyGames: undefined;
   Donate: { gameId: number };
-  SetDonateAmount: undefined;
+  SetDonateAmount: { gameId: number };
   GameAnalytics: { gameId: number };
   AddReward: { gameId: number };
   Settings: undefined;
   AddGames: { userId: number | null };
   GameProfile: { gameId: number };
+  Search: undefined
 };
 
 // Criando o Stack Navigator
@@ -99,7 +100,7 @@ type RootStackProps = {
 export default function RootStack({ linking }: RootStackProps) {
   return (
     <NavigationContainer independent={true} linking={linking} theme={MyTheme}>
-      <Stack.Navigator initialRouteName="Donate">
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep1" component={SignupStep1} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep2" component={SignupStep2} options={{ headerShown: false }} />
@@ -108,6 +109,10 @@ export default function RootStack({ linking }: RootStackProps) {
         <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
         <Stack.Screen name="MyProfile" component={MyProfile} options={{ headerShown: false }} />
         <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerShown: false }} />
+        <Stack.Screen name="AddGames" component={AddGames} options={{ headerShown: false }} />
+        <Stack.Screen name="Search" component={Search} options={{ headerShown: false }} />
+
+
         <Stack.Screen
           name="Home"
           component={Home}
@@ -184,7 +189,7 @@ export default function RootStack({ linking }: RootStackProps) {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="Support"
+          name="Donate"
           component={Support}
           options={{ headerShown: false }}
         />

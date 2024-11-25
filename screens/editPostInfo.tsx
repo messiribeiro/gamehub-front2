@@ -4,7 +4,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { Video, AVPlaybackStatus } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import React, { useState, useRef, useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, Keyboard} from 'react-native';
 
 import {
   View,
@@ -178,6 +178,7 @@ const EditPostInfo = ({ navigation, route }: Props) => {
   };
 
   const handleSubmitPost = async () => {
+    Keyboard.dismiss()
     fetchGames();
     setShowMentionContainer(true)
   };

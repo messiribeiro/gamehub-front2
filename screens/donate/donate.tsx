@@ -24,7 +24,7 @@ type Props = StackScreenProps<RootStackParamList, 'Donate'>;
 
 
 const Donate = ({ navigation, route }: Props) => {
-  const gameId = 241;
+  const {gameId} = route.params;
   
   const [rewards, setRewards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,8 +82,11 @@ const Donate = ({ navigation, route }: Props) => {
   const calculateProgress = () => {
     if (rewards.length === 0) return 0;
   
-    const totalThreshold = rewards.reduce((sum, reward) => sum + reward.threshold, 0);
-    const progress = (totalDonated / totalThreshold) * 100;
+    // Contabiliza as recompensas desbloqueadas, ou seja, aquelas cujo valor é menor ou igual ao total doado
+    const unlockedRewards = rewards.filter(reward => reward.threshold <= totalDonated);
+  
+    // A porcentagem de progresso será baseada no número de recompensas desbloqueadas
+    const progress = (unlockedRewards.length / rewards.length) * 100;
   
     // Garantir que o valor esteja entre 0 e 100
     return Math.min(Math.max(progress, 0), 100);
@@ -157,14 +160,14 @@ const Donate = ({ navigation, route }: Props) => {
             ))
           ) : (
             <Text style={styles.text}>
-              Ainda não há recompensas. Adicione para incentivar seus apoiadores.
+              O desenvolvedor desse jogo ainda não adicionou recompensas
             </Text>
           )}
         </ScrollView>
       </View>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={()=> navigation.navigate("SetDonateAmount", {gameId: gameId})} >
           <Text style={styles.buttonText}>Apoiar</Text>
         </TouchableOpacity>
       </View>

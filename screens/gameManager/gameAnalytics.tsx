@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  
+
 } from 'react-native';
 import api from '../../services/api';
 
@@ -49,37 +49,37 @@ const GameAnalytics = ({ navigation, route }: Props) => {
   const [loading, setLoading] = useState(true);
 
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchGameData = async () => {
-        try {
-          setLoading(true);
-  
-          // Buscar dados do jogo
-          const response = await api.get(`/api/games/${gameId}`);
-          setGameData(response.data);
-  
-          // Buscar número de apoiadores
-          const supportersResponse = await api.get(`/api/donation/game/${gameId}/supporters-count`);
-          setSupportersCount(supportersResponse.data.supportersCount);
-  
-          // Buscar valor arrecadado
-          const donationsResponse = await api.get(`/api/donation/game/${gameId}/author/total-donations`);
-          setTotalDonated(donationsResponse.data.totalDonated);
-  
-          // Buscar recompensas
-          const rewardsResponse = await api.get(`/api/donation/benefits/${gameId}`);
-          setRewards(rewardsResponse.data);
-        } catch (error) {
-          console.error("Erro ao buscar os dados:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchGameData();
-    }, [gameId])
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const fetchGameData = async () => {
+  //       try {
+  //         setLoading(true);
+
+  //         // Buscar dados do jogo
+  //         const response = await api.get(`/api/games/${gameId}`);
+  //         setGameData(response.data);
+
+  //         // Buscar número de apoiadores
+  //         const supportersResponse = await api.get(`/api/donation/game/${gameId}/supporters-count`);
+  //         setSupportersCount(supportersResponse.data.supportersCount);
+
+  //         // Buscar valor arrecadado
+  //         const donationsResponse = await api.get(`/api/donation/game/${gameId}/author/total-donations`);
+  //         setTotalDonated(donationsResponse.data.totalDonated);
+
+  //         // Buscar recompensas
+  //         const rewardsResponse = await api.get(`/api/donation/benefits/${gameId}`);
+  //         setRewards(rewardsResponse.data);
+  //       } catch (error) {
+  //         console.error("Erro ao buscar os dados:", error);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+
+  //     fetchGameData();
+  //   }, [gameId])
+  // );
 
 
   // Função para buscar os dados do jogo
@@ -93,7 +93,7 @@ const GameAnalytics = ({ navigation, route }: Props) => {
         // Buscar número de apoiadores
         const supportersResponse = await api.get(`https://gamehub-back-706779899193.us-central1.run.app/api/donation/game/${gameId}/supporters-count`);
         setSupportersCount(supportersResponse.data.supportersCount);
-
+        console.log(supportersResponse.data)
         // Buscar valor arrecadado
         const donationsResponse = await api.get(`https://gamehub-back-706779899193.us-central1.run.app/api/donation/game/${gameId}/author/total-donations`);
         setTotalDonated(donationsResponse.data.totalDonated);
@@ -145,17 +145,33 @@ const GameAnalytics = ({ navigation, route }: Props) => {
         </Text>
       </View>
 
+
+
+      {/* <View style={styles.noDonationContainer} >
+        <Text style={styles.noDonationTitle}>Você não está recebendo doações 🙁</Text>
+        <Text style={styles.noDonationsubTitle}>Para ativar o sistema de doações nos seus jogos, é necessário cadastrar sua conta do Mercado Pago em nossa plataforma.</Text>
+
+        <TouchableOpacity style={styles.addAccountButton} >
+          <Text style={styles.addAccountButtonText} >Adicionar conta</Text>
+        </TouchableOpacity>
+      </View> */}
+
       <View style={styles.main}>
-        <Text style={styles.messageText}>
-          Parabéns! Você chegou à marca de {supportersCount} apoiadores nesse jogo 🎉
-        </Text>
+        {supportersCount > 0 && (
+          <Text style={styles.messageText}>
+            Parabéns! Você chegou à marca de {supportersCount}{" "}
+            {supportersCount === 1 ? "apoiador" : "apoiadores"} nesse jogo 🎉
+          </Text>
+        )}
         <View style={styles.analyticsContainer}>
           <View style={styles.supporterCounter}>
             <Text style={styles.analyticsTitleText}>Apoiadores</Text>
             <Text style={styles.analyticsNumberText}>{supportersCount}</Text>
             <View style={styles.lastMonthText}>
               <Feather name="arrow-up" color={"#5FFF51"} size={15} />
-              <Text style={styles.analyticsLastMonthText}>10 no último mês</Text>
+              <Text style={styles.analyticsLastMonthText}>
+                {supportersCount} no último mês
+              </Text>
             </View>
           </View>
           <View style={styles.amount}>
@@ -163,31 +179,34 @@ const GameAnalytics = ({ navigation, route }: Props) => {
             <Text style={styles.analyticsNumberText}>R$ {totalDonated.toFixed(2)}</Text>
             <View style={styles.lastMonthText}>
               <Feather name="arrow-up" color={"#5FFF51"} size={15} />
-              <Text style={styles.analyticsLastMonthText}>R$ {totalDonated.toFixed(2)} no último mês</Text>
+              <Text style={styles.analyticsLastMonthText}>
+                R$ {totalDonated.toFixed(2)} no último mês
+              </Text>
             </View>
           </View>
         </View>
+      </View>
 
-        <Text style={styles.rewardsContainerTitle}>Recompensas para seus apoiadores</Text>
-        <ScrollView style={styles.rewardsContainer}>
-  {rewards.length === 0 ? (
-    <View style={styles.noRewardContainer}>
-      <Text style={styles.noRewardText}>
-        Ainda não há recompensas disponíveis. Adicione uma recompensa para incentivar seus apoiadores e tornar o seu jogo ainda mais atrativo!
-      </Text>
-    </View>
-  ) : (
-    rewards.map((reward) => (
-      <View key={reward.id} style={styles.reward}>
-        <Text style={styles.rewardDescription}>{reward.description}</Text>
-        <View style={styles.priceAndStatus}>
-          <Text style={styles.rewardPrice}>R$ {reward.threshold.toFixed(2)}</Text>
-        </View>
-      </View>
-    ))
-  )}
-</ScrollView>
-      </View>
+
+      <Text style={styles.rewardsContainerTitle}>Recompensas para seus apoiadores</Text>
+      <ScrollView style={styles.rewardsContainer}>
+        {rewards.length === 0 ? (
+          <View style={styles.noRewardContainer}>
+            <Text style={styles.noRewardText}>
+              Ainda não há recompensas disponíveis. Adicione uma recompensa para incentivar seus apoiadores e tornar o seu jogo ainda mais atrativo!
+            </Text>
+          </View>
+        ) : (
+          rewards.map((reward) => (
+            <View key={reward.id} style={styles.reward}>
+              <Text style={styles.rewardDescription}>{reward.description}</Text>
+              <View style={styles.priceAndStatus}>
+                <Text style={styles.rewardPrice}>R$ {reward.threshold.toFixed(2)}</Text>
+              </View>
+            </View>
+          ))
+        )}
+      </ScrollView>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("AddReward", { gameId: gameId })}>
@@ -239,8 +258,8 @@ const styles = StyleSheet.create({
 
   },
   gameImage: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     borderRadius: 10
   },
   data: {
@@ -248,24 +267,24 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "white",
-    fontSize: 12,
+    fontSize: 14,
   },
   publicationDate: {
-    fontSize: 10,
+    fontSize: 12,
     width: "80%",
     color: "white",
     fontWeight: "300"
   },
   supportInfoText: {
     color: "white",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "300",
     marginTop: 10
   },
 
   gameName: {
     color: "white",
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600"
   },
   main: {
@@ -318,7 +337,8 @@ const styles = StyleSheet.create({
   },
   rewardsContainer: {
     marginTop: 5,
-    height: 260
+    maxHeight: 270,
+    paddingHorizontal: "5%"
   },
   reward: {
     backgroundColor: "#2B2B2C",
@@ -350,7 +370,8 @@ const styles = StyleSheet.create({
   rewardsContainerTitle: {
     color: "white",
     marginBottom: 14,
-    marginTop: 30
+    marginTop: 20,
+    paddingHorizontal: "5%",
   },
 
   footer: {
@@ -390,10 +411,38 @@ const styles = StyleSheet.create({
   },
   noRewardText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 14,
     textAlign: 'center',
     fontWeight: '300',
   },
+
+  noDonationContainer: {
+    marginTop: "50%",
+    padding: "8%"
+  },
+  noDonationTitle: {
+    color: "white",
+    fontSize: 20
+  },
+  noDonationsubTitle: {
+    color: "white",
+    fontSize: 16,
+    marginTop: 20
+  },
+  addAccountButton: {
+    backgroundColor: "#424242",
+    width: "100%",
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+    marginTop: 20
+  },
+  addAccountButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700"
+  }
 
 });
 

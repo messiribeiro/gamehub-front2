@@ -84,7 +84,15 @@ const AddGame: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Adicionar Jogos</Text>
+      <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <Feather name="arrow-left" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Meus Jogos</Text>
+        </View>
 
       {/* Barra de busca */}
       <View style={styles.searchContainer}>
@@ -101,6 +109,7 @@ const AddGame: React.FC<Props> = ({ navigation, route }) => {
       {/* Lista de jogos */}
       <FlatList
         data={filteredGames}
+        contentContainerStyle={styles.flatListContent}
         keyExtractor={(item) => item.id}
         numColumns={3}
         renderItem={({ item }) => (
@@ -135,6 +144,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#121212",
     alignItems: "center",
     paddingTop: 20,
+    marginBottom: 20
+  },
+
+   header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 40,
+  },
+  backButton: {
+    position: "absolute",
+    left:"-32%",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
   },
   title: {
     fontSize: 25,
@@ -150,6 +176,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 20,
     width: "90%",
+  },
+
+  flatListContent: {
   },
   searchBar: {
     flex: 1,
@@ -168,8 +197,8 @@ const styles = StyleSheet.create({
     margin: 10,
     alignItems: "center",
     justifyContent: "center",
-    width: 85,
-    height: 85,
+    width: 100,
+    height: 100,
     borderRadius: 5,
   },
   selectedGameIconContainer: {
@@ -187,7 +216,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#512DA8",
     padding: 15,
     borderRadius: 10,
-    width: "70%",
+    width: "90%",
     height: 50,
     alignItems: "center",
     justifyContent: "center",

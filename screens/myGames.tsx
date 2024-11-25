@@ -11,6 +11,8 @@ import {
   Easing,
   Dimensions,
   TouchableWithoutFeedback,
+  RefreshControl,
+  ScrollView
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -27,6 +29,7 @@ const MyGames = ({ navigation }: Props) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [showAlert, setShowAlert] = useState(false); // Estado para controlar a visibilidade do alerta
+  const [refreshing, setRefreshing] = useState(false); // Estado de refresh
 
   const optionsAnim = useRef(new Animated.Value(0)).current;
   const screenHeight = Dimensions.get("window").height;
@@ -63,6 +66,21 @@ const MyGames = ({ navigation }: Props) => {
       fetchUserGames();
     }
   }, [userId]);
+
+  // Função para puxar e atualizar a lista de jogos
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    if (userId !== null) {
+      try {
+        const response = await api.get(`/api/users/${userId}`);
+        const userGames = response.data.GameUser;
+        setGames(userGames);
+      } catch (error) {
+        console.error("Erro ao buscar os jogos:", error);
+      }
+    }
+    setRefreshing(false);
+  };
 
   const showOptions = (gameId: string) => {
     setSelectedGame(gameId);
@@ -119,7 +137,7 @@ const MyGames = ({ navigation }: Props) => {
           >
             <Feather name="arrow-left" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Dashboard</Text>
+          <Text style={styles.headerTitle}>Meus Jogos</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#fff" />
@@ -142,7 +160,12 @@ const MyGames = ({ navigation }: Props) => {
           <Text style={styles.headerTitle}>Meus Jogos</Text>
         </View>
 
-        <View style={styles.main}>
+        <ScrollView
+          contentContainerStyle={styles.main}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+        >
           <Text style={styles.mainTitle}>Jogos da sua lista</Text>
 
           {games.length === 0 ? (
@@ -171,11 +194,7 @@ const MyGames = ({ navigation }: Props) => {
                   activeOpacity={0.7}
                 >
                   <View
-                    style={[
-                      styles.game,
-                      selectedGame &&
-                        selectedGame !== game.game.id && { opacity: 0.3 },
-                    ]}
+                    style={[styles.game, selectedGame && selectedGame !== game.game.id && { opacity: 0.3 }]}
                   >
                     <Image
                       source={{ uri: game.game.gameimageUrl }}
@@ -186,7 +205,7 @@ const MyGames = ({ navigation }: Props) => {
               ))}
             </View>
           )}
-        </View>
+        </ScrollView>
 
         {!selectedGame && (
           <View style={styles.footer}>
@@ -228,6 +247,7 @@ const MyGames = ({ navigation }: Props) => {
     </TouchableWithoutFeedback>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -279,8 +299,8 @@ const styles = StyleSheet.create({
   },
   game: {},
   gameImage: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: 10,
   },
   footer: {

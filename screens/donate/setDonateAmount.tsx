@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useState } from 'react';
-import { StatusBar } from 'react-native';
+import React, { useState, useEffect, useId } from 'react';
+import { StatusBar, Linking } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import {
   View,
   Text,
@@ -12,21 +13,84 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 
 import { RootStackParamList } from '../../navigation';
+import api from '@/services/api';
 
 type Props = StackScreenProps<RootStackParamList, 'SetDonateAmount'>;
 
-const SetDonateAmount = ({ navigation }: Props) => {
-  // Define o valor inicial como 0,01
+const SetDonateAmount = ({ navigation, route}: Props) => {
+  const { gameId } = route.params;
   const [donationAmount, setDonationAmount] = useState('0,01');
+  const [gameData, setGameData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false); // Para indicar o carregamento no envio
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    // Função para buscar os dados do jogo
+    const fetchGameData = async () => {
+      try {
+        const response = await api.get(`/api/games/${gameId}`);
+        const data = await response.data;
+        setGameData(data);
+      } catch (error) {
+        console.error('Erro ao buscar dados do jogo:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGameData(); // Chama a função quando o componente for montado
+  }, []);
 
   const handleInputChange = (value: string) => {
-    // Atualiza o valor da doação
     setDonationAmount(value);
   };
 
+  const handleDonate = async () => {
+    setIsProcessing(true); // Inicia o carregamento
+  
+    try {
+      // Recuperando o userId do AsyncStorage
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        console.error('Usuário não autenticado');
+        return;
+      }
+  
+      const amount = parseFloat(donationAmount.replace(',', '.')); // Convertendo o valor da doação para float
+      const description = 'Doação para o desenvolvimento do jogo';
+      console.log(gameId)
+  
+      // Enviando os dados para a API para criar a doação
+      const response = await api.post('/api/donation', {
+        userId,
+        gameId: gameId,
+        amount,
+        description,
+        payerEmail: email,  // Agora passando o email
+      });
+  
+      const { initPoint } = response.data; // Recebendo o link do Mercado Pago
+      console.log(initPoint)
+  
+      if (initPoint) {
+        // Utilizando o Linking para abrir a URL
+        Linking.openURL(initPoint)
+          .catch(err => console.error('Erro ao abrir URL do Mercado Pago:', err));
+      } else {
+        console.log(response.data);
+        console.error('Erro ao criar a doação: não foi recebido o link de pagamento');
+      }
+    } catch (error) {
+      console.error('Erro ao criar doação:', error);
+    } finally {
+      setIsProcessing(false); // Finaliza o carregamento
+    }
+  };
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#1B1B1E" />
@@ -36,36 +100,62 @@ const SetDonateAmount = ({ navigation }: Props) => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.gameImageContainer}>
-        <Image
-          source={{
-            uri: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5cd1f6af-ed85-437b-ba2a-131693b7f3d8/dgj3kny-2ee3a0e9-ee94-4add-b61b-7d99f2858614.png/v1/fill/w_1280,h_1280,q_80,strp/gta_6_logo__4k__by_giga_bitten_dgj3kny-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzVjZDFmNmFmLWVkODUtNDM3Yi1iYTJhLTEzMTY5M2I3ZjNkOFwvZGdqM2tueS0yZWUzYTBlOS1lZTk0LTRhZGQtYjYxYi03ZDk5ZjI4NTg2MTQucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.2lLFlLqUI0F3Efblkgpp2kzZFgVwuMphRh8VyWy6d5A',
-          }}
-          style={styles.gameImage}
-        />
-      </View>
-      <View style={styles.main}>
-        <Text style={styles.text}>Que legal que você quer apoiar o desenvolvimento do jogo GTA VI 😁</Text>
-        <View style={styles.setAmountContainer}>
-          <Text style={styles.setAmountContainerTitle}>Qual o valor da sua doação?</Text>
-          <View style={styles.inputContainer}>
-            <Text style={styles.currencySymbol}>R$</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="0,00"
-              placeholderTextColor="#888"
-              keyboardType="numeric"
-              value={donationAmount}
-              onChangeText={handleInputChange}
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#fff" />
+      ) : (
+        <>
+          <View style={styles.gameImageContainer}>
+            <Image
+              source={{ uri: gameData?.gameimageUrl }}
+              style={styles.gameImage}
             />
           </View>
-          <Text style={styles.message}>Só aceitamos pagamentos via pix</Text>
-        </View>
-      </View>
+
+          <View style={styles.main}>
+            <Text style={styles.text}>
+              Que legal que você quer apoiar o desenvolvimento do jogo {gameData?.name} 😁
+            </Text>
+
+            <Text style={styles.categoryText}>Categoria: {gameData?.category}</Text>
+
+            <View style={styles.setAmountContainer}>
+              <Text style={styles.setAmountContainerTitle}>Qual o valor da sua doação?</Text>
+              <View style={styles.inputContainer}>
+                <Text style={styles.currencySymbol}>R$</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="0,00"
+                  placeholderTextColor="#888"
+                  keyboardType="numeric"
+                  value={donationAmount}
+                  onChangeText={handleInputChange}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <View style={styles.mailIcon}>
+                  <Feather name='mail' size={20} color={"white"} />
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Seu email"
+                  placeholderTextColor="#888"
+                  value={email}  // Vincula o estado ao valor do input
+                  onChangeText={setEmail}  // Atualiza o estado ao digitar
+                />
+              </View>
+              <Text style={styles.message}>Só aceitamos pagamentos via pix</Text>
+            </View>
+          </View>
+        </>
+      )}
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Ir para o pagamento</Text>
+        <TouchableOpacity style={styles.button} onPress={handleDonate} disabled={isProcessing}>
+          {isProcessing ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Ir para o pagamento</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -88,11 +178,6 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: 20,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
   },
   footer: {
     width: '100%',
@@ -131,6 +216,11 @@ const styles = StyleSheet.create({
   text: {
     color: 'white',
   },
+  categoryText: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 10,
+  },
   setAmountContainer: {
     marginTop: 40,
   },
@@ -162,7 +252,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.2,
     marginTop: 10,
-  }
+  },
+  mailIcon: {
+    marginRight: 10,
+  },
+
 });
 
 export default SetDonateAmount;

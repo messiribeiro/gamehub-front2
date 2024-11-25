@@ -67,8 +67,8 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
     // setLoading(true);
     try {
       const response = await api.get(`api/games/${gameId}/profile`);
-      setgameData(response.data);
-
+      setgameData(response.data); 
+      console.log(response.data.isStatic)
       const followStatsResponse = await api.get(
         `/api/friendships/stats/${gameId}`
       );
@@ -196,7 +196,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
           </View>
         </View>
         <View style={styles.buttonsContainer}>
-          <Animated.View style={{ transform: [{ scale: animation }] }}>
+          <Animated.View  style={{ transform: [{ scale: animation }] }}>
             <TouchableOpacity
               style={[
                 styles.followButton,
@@ -209,13 +209,13 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
                 {isFollowing ? "Seguindo" : "Seguir"}
               </Text>
             </TouchableOpacity>
+            
           </Animated.View>
-          {gameData?.isStatic && (
-            <View style={styles.messageButton}>
-              <TouchableOpacity>
-                <Feather name="dollar-sign" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
+          
+          {!gameData?.isStatic && (
+            <TouchableOpacity style={styles.donateButton} onPress={() => {navigation.navigate("Donate", {gameId: gameId})}} >
+            <Feather name="dollar-sign" size={24} color={"#fff"}/>
+          </TouchableOpacity>
           )}
         </View>
       </View>
@@ -383,6 +383,15 @@ const styles = StyleSheet.create({
     opacity: 0.4,
     top: -100,
   },
+  donateButton: {
+    backgroundColor: "#701EFF",
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+  },
+  
 });
 
 export default Profile;
