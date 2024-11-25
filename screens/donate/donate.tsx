@@ -20,76 +20,159 @@ import api from '../../services/api';
 import { RootStackParamList } from '../../navigation';
 import { FlatList } from 'react-native-gesture-handler';
 
-type Props = StackScreenProps<RootStackParamList, 'Support'>;
+type Props = StackScreenProps<RootStackParamList, 'Donate'>;
 
 
-const Support = ({ navigation }: Props) => {
+const Donate = ({ navigation, route }: Props) => {
+  const gameId = 241;
+  
+  const [rewards, setRewards] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalDonated, setTotalDonated] = useState<number>(0);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [gameData, setGameData] = useState<{ name: string; gameimageUrl: string; category: string } | null>(null);
+
+  // Fetch rewards
+  useEffect(() => {
+    const fetchRewards = async () => {
+      try {
+        const rewardsResponse = await api.get(`/api/donation/benefits/${gameId}`);
+        setRewards(rewardsResponse.data);
+      } catch (error) {
+        console.error('Erro ao buscar recompensas:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRewards();
+  }, []);
+
+  // Fetch total donations
+  useEffect(() => {
+    const fetchTotalDonations = async () => {
+      const id = await AsyncStorage.getItem("userId");
+      setUserId(id);
+      try {
+        const response = await api.get(`/api/donation/user/${id}/game/${gameId}/total-donations`);
+        setTotalDonated(response.data.totalDonated);
+      } catch (error) {
+        console.error('Erro ao buscar total de doações:', error);
+        setTotalDonated(0); // Valor padrão em caso de erro
+      }
+    };
+
+    fetchTotalDonations();
+  }, [userId, gameId]);
+
+  // Fetch game data
+  useEffect(() => {
+    const fetchGameData = async () => {
+      try {
+        const response = await api.get(`/api/games/${gameId}`);
+        setGameData(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar dados do jogo:', error);
+      }
+    };
+
+    fetchGameData();
+  }, [gameId]);
+
+  const calculateProgress = () => {
+    if (rewards.length === 0) return 0;
+  
+    const totalThreshold = rewards.reduce((sum, reward) => sum + reward.threshold, 0);
+    const progress = (totalDonated / totalThreshold) * 100;
+  
+    // Garantir que o valor esteja entre 0 e 100
+    return Math.min(Math.max(progress, 0), 100);
+  };
+
   return (
-    
-    <View style={styles.container} >
-      <StatusBar  backgroundColor="#1B1B1E" />
+    <View style={styles.container}>
+      <StatusBar backgroundColor="#1B1B1E" />
       <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Feather name="arrow-left" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Apoie</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Apoie</Text>
       </View>
 
       <View style={styles.gameInfo}>
-          <Text style={styles.gameName}>Grand Theft Auto VI</Text>
-          <View style={styles.gameData}>
-            <Image
-              source={{ uri: "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5cd1f6af-ed85-437b-ba2a-131693b7f3d8/dgj3kny-2ee3a0e9-ee94-4add-b61b-7d99f2858614.png/v1/fill/w_1280,h_1280,q_80,strp/gta_6_logo__4k__by_giga_bitten_dgj3kny-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzVjZDFmNmFmLWVkODUtNDM3Yi1iYTJhLTEzMTY5M2I3ZjNkOFwvZGdqM2tueS0yZWUzYTBlOS1lZTk0LTRhZGQtYjYxYi03ZDk5ZjI4NTg2MTQucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.2lLFlLqUI0F3Efblkgpp2kzZFgVwuMphRh8VyWy6d5A" }}
-              style={styles.gameImage}
-            />
-            <View style={styles.data}>
-              <View>
-                <Text style={styles.text} >Jogo de mundo aberto</Text>
-                <Text style={styles.text}>Desenvolvedor: droffyzin</Text>
+        {gameData ? (
+          <>
+            <Text style={styles.gameName}>{gameData.name}</Text>
+            <View style={styles.gameData}>
+              <Image
+                source={{ uri: gameData.gameimageUrl }}
+                style={styles.gameImage}
+              />
+              <View style={styles.data}>
+                <Text style={styles.text}>Categoria: {gameData.category}</Text>
+                <Text style={styles.publicationDate}>Publicado em 30 de outubro de 2024</Text>
               </View>
-              
-
-              <Text style={styles.publicationDate}>Publicado em 30 de outubro de 2024</Text>
-
             </View>
-          </View>
-        <Text style={styles.supportInfoText} >Apoie Grand Theft Auto e receba recompensas dentro do jogo</Text>
-
+            <Text style={styles.supportInfoText}>
+              Apoie {gameData.name} e receba recompensas dentro do jogo
+            </Text>
+          </>
+        ) : (
+          <ActivityIndicator size="large" color="#FAFF73" />
+        )}
       </View>
 
-      <View style={styles.main}> 
-        <Text style={styles.text}>Você já contribuiu com 100 reais 🔥</Text>
-        <View style={styles.progressBar}/>
-
-        <View style={styles.rewardsContainer}>
-          <Text style={styles.rewardsContainerTitle}>Recompensas</Text>
-          <View style={styles.reward}>
-            <Text style={styles.rewardDescription}>Acesso à versão beta do jogo</Text>
-            <View style={styles.priceAndStatus} >
-              <Text style={styles.rewardPrice} >R$ 100,00</Text>
-              <Text style={styles.rewardStatus} >Desbloqueado</Text>
-            </View>
-          </View>
-
-          <View style={styles.rewardLocked}>
-            <Text style={styles.rewardDescription}>Receber a skin do bolsonaro</Text>
-            <View style={styles.priceAndStatus} >
-              <Text style={styles.rewardPrice} >R$ 150,00</Text>
-              <Text style={styles.rewardStatus} >Bloqueado</Text>
-            </View>
-          </View>
+      <View style={styles.main}>
+        <Text style={styles.text}>
+          Você já contribuiu com{' '}
+          {totalDonated !== null ? `${totalDonated} reais 🔥` : 'carregando...'}
+        </Text>
+        <View style={styles.progressBarContainer}>
+          <View
+            style={[
+              styles.progressBar,
+              { width: `${calculateProgress()}%` }, // Largura baseada na porcentagem
+            ]}
+          />
         </View>
+
+        <ScrollView style={styles.rewardsContainer}>
+          <Text style={styles.rewardsContainerTitle}>Recompensas</Text>
+          {loading ? (
+            <ActivityIndicator size="large" color="#FAFF73" />
+          ) : rewards.length > 0 ? (
+            rewards.map((reward) => (
+              <View
+                key={reward.id}
+                style={reward.threshold <= totalDonated ? styles.reward : styles.rewardLocked}
+              >
+                <Text style={styles.rewardDescription}>{reward.description}</Text>
+                <View style={styles.priceAndStatus}>
+                  <Text style={styles.rewardPrice}>R$ {reward.threshold.toFixed(2)}</Text>
+                  <Text style={styles.rewardStatus}>
+                    {reward.threshold <= totalDonated ? 'Desbloqueado' : 'Bloqueado'}
+                  </Text>
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.text}>
+              Ainda não há recompensas. Adicione para incentivar seus apoiadores.
+            </Text>
+          )}
+        </ScrollView>
       </View>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText} >Apoiar</Text>
+          <Text style={styles.buttonText}>Apoiar</Text>
         </TouchableOpacity>
       </View>
-
     </View>
-  )
+  );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -164,14 +247,22 @@ const styles = StyleSheet.create({
     marginTop: "50%",
     paddingHorizontal: "5%"
   },
-  progressBar: {
+  progressBarContainer: {
+    height: 8,
+    backgroundColor: "#333",
+    borderRadius: 4,
+    overflow: "hidden", // Para manter a barra dentro dos limites
     marginTop: 10,
-    backgroundColor: "#FAFF73",
-    width: 100,
-    height: 4,
   },
+  progressBar: {
+    height: "100%",
+    backgroundColor: "#FAFF73",
+    borderRadius: 4,
+  },
+
   rewardsContainer: {
     marginTop: 30,
+    height: "68%"
   },
   reward: {
     backgroundColor: "#2F4B2D",
@@ -231,4 +322,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Support;
+export default Donate;

@@ -124,7 +124,7 @@ const Dashboard = ({ navigation, route }: Props) => {
           style={styles.flatList}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.gameCard}>
+            <TouchableOpacity onPress={()=>{navigation.navigate("GameAnalytics", {gameId: item.id})} } style={styles.gameCard}>
               <Image
                 source={{ uri: item.gameimageUrl || 'https://via.placeholder.com/100' }}
                 style={styles.gameImage}
@@ -136,7 +136,7 @@ const Dashboard = ({ navigation, route }: Props) => {
                   {item.description}
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />

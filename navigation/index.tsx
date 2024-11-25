@@ -27,7 +27,7 @@ import Login from '../screens/login';
 import SignupStep1 from '../screens/signupStep1';
 import SignupStep2 from '../screens/signupStep2';
 import SignupStep3 from '../screens/signupStep3';
-import Support from '@/screens/donate/donate';
+import Donate from '@/screens/donate/donate';
 
 import AddReward from '@/screens/gameManager/addReward';
 import SetDonateAmount from '@/screens/donate/setDonateAmount';
@@ -65,10 +65,10 @@ export type RootStackParamList = {
   Dashboard: { from?: string };
   Payment: { type: string };
   MyGames: undefined;
-  Support: undefined;
+  Donate: { gameId: number };
   SetDonateAmount: undefined;
-  GameAnalytics: undefined;
-  AddReward: undefined;
+  GameAnalytics: { gameId: number };
+  AddReward: { gameId: number };
   Settings: undefined;
   Search: undefined;
 };
@@ -100,7 +100,7 @@ type RootStackProps = {
 export default function RootStack({ linking }: RootStackProps) {
   return (
     <NavigationContainer independent={true} linking={linking} theme={MyTheme}>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Donate">
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep1" component={SignupStep1} options={{ headerShown: false }} />
         <Stack.Screen name="SignupStep2" component={SignupStep2} options={{ headerShown: false }} />
@@ -139,7 +139,7 @@ export default function RootStack({ linking }: RootStackProps) {
         <Stack.Screen name="GamePreview" component={GamePreview} options={{ headerShown: false }} />
         <Stack.Screen name="Payment" component={Payment} options={{ headerShown: false }} />
         <Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }} />
-        <Stack.Screen name="Support" component={Support} options={{ headerShown: false }} />
+        <Stack.Screen name="Donate" component={Donate} options={{ headerShown: false }} />
         <Stack.Screen name="MyGames" component={MyGames} options={{ headerShown: false }} />
         <Stack.Screen name="GameAnalytics" component={GameAnalytics} options={{ headerShown: false }} />
         <Stack.Screen name="SetDonateAmount" component={SetDonateAmount} options={{ headerShown: false }} />

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { StatusBar } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  
 } from 'react-native';
 import api from '../../services/api';
 
@@ -21,12 +22,104 @@ import { RootStackParamList } from '../../navigation';
 import { FlatList } from 'react-native-gesture-handler';
 
 type Props = StackScreenProps<RootStackParamList, 'GameAnalytics'>;
+type Reward = {
+  id: number;
+  gameId: number;
+  threshold: number;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+const GameAnalytics = ({ navigation, route }: Props) => {
+  const { gameId } = route.params;
+
+  // Estado para armazenar os dados do jogo
+  const [gameData, setGameData] = useState({
+    id: "",
+    name: "",
+    gameimageUrl: "",
+    category: "",
+  });
+
+  // Estado para armazenar o número de apoiadores e valor arrecadado
+  const [supportersCount, setSupportersCount] = useState(0);
+  const [totalDonated, setTotalDonated] = useState(0);
+  const [rewards, setRewards] = useState<Reward[]>([]);
+  const [loading, setLoading] = useState(true);
 
 
-const GameAnalytics = ({ navigation }: Props) => {
+  useFocusEffect(
+    useCallback(() => {
+      const fetchGameData = async () => {
+        try {
+          setLoading(true);
+  
+          // Buscar dados do jogo
+          const response = await api.get(`/api/games/${gameId}`);
+          setGameData(response.data);
+  
+          // Buscar número de apoiadores
+          const supportersResponse = await api.get(`/api/donation/game/${gameId}/supporters-count`);
+          setSupportersCount(supportersResponse.data.supportersCount);
+  
+          // Buscar valor arrecadado
+          const donationsResponse = await api.get(`/api/donation/game/${gameId}/author/total-donations`);
+          setTotalDonated(donationsResponse.data.totalDonated);
+  
+          // Buscar recompensas
+          const rewardsResponse = await api.get(`/api/donation/benefits/${gameId}`);
+          setRewards(rewardsResponse.data);
+        } catch (error) {
+          console.error("Erro ao buscar os dados:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchGameData();
+    }, [gameId])
+  );
+
+
+  // Função para buscar os dados do jogo
+  useEffect(() => {
+    const fetchGameData = async () => {
+      try {
+        // Buscar dados do jogo
+        const response = await api.get(`https://gamehub-back-706779899193.us-central1.run.app/api/games/${gameId}`);
+        setGameData(response.data);
+
+        // Buscar número de apoiadores
+        const supportersResponse = await api.get(`https://gamehub-back-706779899193.us-central1.run.app/api/donation/game/${gameId}/supporters-count`);
+        setSupportersCount(supportersResponse.data.supportersCount);
+
+        // Buscar valor arrecadado
+        const donationsResponse = await api.get(`https://gamehub-back-706779899193.us-central1.run.app/api/donation/game/${gameId}/author/total-donations`);
+        setTotalDonated(donationsResponse.data.totalDonated);
+        const rewardsResponse = await api.get(`https://gamehub-back-706779899193.us-central1.run.app/api/donation/benefits/${gameId}`);
+        setRewards(rewardsResponse.data);
+
+      } catch (error) {
+        console.error("Erro ao buscar os dados:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGameData();
+  }, [gameId]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
   return (
-
-    <View style={styles.container} >
+    <View style={styles.container}>
       <StatusBar backgroundColor="#1B1B1E" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -36,81 +129,74 @@ const GameAnalytics = ({ navigation }: Props) => {
       </View>
 
       <View style={styles.gameInfo}>
-        <Text style={styles.gameName}>Grand Theft Auto VI</Text>
+        <Text style={styles.gameName}>{gameData.name}</Text>
         <View style={styles.gameData}>
-          <Image
-            source={{ uri: "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5cd1f6af-ed85-437b-ba2a-131693b7f3d8/dgj3kny-2ee3a0e9-ee94-4add-b61b-7d99f2858614.png/v1/fill/w_1280,h_1280,q_80,strp/gta_6_logo__4k__by_giga_bitten_dgj3kny-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI4MCIsInBhdGgiOiJcL2ZcLzVjZDFmNmFmLWVkODUtNDM3Yi1iYTJhLTEzMTY5M2I3ZjNkOFwvZGdqM2tueS0yZWUzYTBlOS1lZTk0LTRhZGQtYjYxYi03ZDk5ZjI4NTg2MTQucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.2lLFlLqUI0F3Efblkgpp2kzZFgVwuMphRh8VyWy6d5A" }}
-            style={styles.gameImage}
-          />
+          <Image source={{ uri: gameData.gameimageUrl }} style={styles.gameImage} />
           <View style={styles.data}>
             <View>
-              <Text style={styles.text} >Jogo de mundo aberto</Text>
+              <Text style={styles.text}>Categoria: {gameData.category}</Text>
               <Text style={styles.text}>Desenvolvedor: droffyzin</Text>
             </View>
-
-
             <Text style={styles.publicationDate}>Publicado em 30 de outubro de 2024</Text>
-
           </View>
         </View>
-        <Text style={styles.supportInfoText} >Grand Theft Auto V é um jogo eletrônico de ação-aventura desenvolvido pela Rockstar North e publicado pela Rockstar Games.</Text>
-
+        <Text style={styles.supportInfoText}>
+          {gameData.name} é um jogo eletrônico da categoria {gameData.category}.
+        </Text>
       </View>
-
 
       <View style={styles.main}>
-        <Text style={styles.messageText} >Parabéns! Você chegou à marca de 100 apoiadores nesse jogo  🎉</Text>
+        <Text style={styles.messageText}>
+          Parabéns! Você chegou à marca de {supportersCount} apoiadores nesse jogo 🎉
+        </Text>
         <View style={styles.analyticsContainer}>
-          <View style={styles.supporterCounter} >
-            <Text style={styles.analyticsTitleText} >Apoiadores</Text>
-            <Text style={styles.analyticsNumberText} >10</Text>
+          <View style={styles.supporterCounter}>
+            <Text style={styles.analyticsTitleText}>Apoiadores</Text>
+            <Text style={styles.analyticsNumberText}>{supportersCount}</Text>
             <View style={styles.lastMonthText}>
-              <Feather name='arrow-up' color={"#5FFF51"} size={15} />
-              <Text style={styles.analyticsLastMonthText} >10 no último mês</Text>
+              <Feather name="arrow-up" color={"#5FFF51"} size={15} />
+              <Text style={styles.analyticsLastMonthText}>10 no último mês</Text>
             </View>
-
           </View>
-          <View style={styles.amount} >
-            <Text style={styles.analyticsTitleText} >Valor arrecadado</Text>
-            <Text style={styles.analyticsNumberText} >R$ 1000,00</Text>
+          <View style={styles.amount}>
+            <Text style={styles.analyticsTitleText}>Valor arrecadado</Text>
+            <Text style={styles.analyticsNumberText}>R$ {totalDonated.toFixed(2)}</Text>
             <View style={styles.lastMonthText}>
-              <Feather name='arrow-up' color={"#5FFF51"} size={15} />
-              <Text style={styles.analyticsLastMonthText} >R$ 1000,00 no último mês</Text>
-            </View>
-          </View>
-
-
-
-        </View>
-        <View style={styles.rewardsContainer}>
-          <Text style={styles.rewardsContainerTitle}>Recompensas para seus apoiadores</Text>
-          <View style={styles.reward}>
-            <Text style={styles.rewardDescription}>Acesso à versão beta do jogo</Text>
-            <View style={styles.priceAndStatus} >
-              <Text style={styles.rewardPrice} >R$ 100,00</Text>
-            </View>
-          </View>
-
-          <View style={styles.reward}>
-            <Text style={styles.rewardDescription}>Receber a skin do bolsonaro</Text>
-            <View style={styles.priceAndStatus} >
-              <Text style={styles.rewardPrice} >R$ 150,00</Text>
+              <Feather name="arrow-up" color={"#5FFF51"} size={15} />
+              <Text style={styles.analyticsLastMonthText}>R$ {totalDonated.toFixed(2)} no último mês</Text>
             </View>
           </View>
         </View>
 
-
+        <Text style={styles.rewardsContainerTitle}>Recompensas para seus apoiadores</Text>
+        <ScrollView style={styles.rewardsContainer}>
+  {rewards.length === 0 ? (
+    <View style={styles.noRewardContainer}>
+      <Text style={styles.noRewardText}>
+        Ainda não há recompensas disponíveis. Adicione uma recompensa para incentivar seus apoiadores e tornar o seu jogo ainda mais atrativo!
+      </Text>
+    </View>
+  ) : (
+    rewards.map((reward) => (
+      <View key={reward.id} style={styles.reward}>
+        <Text style={styles.rewardDescription}>{reward.description}</Text>
+        <View style={styles.priceAndStatus}>
+          <Text style={styles.rewardPrice}>R$ {reward.threshold.toFixed(2)}</Text>
+        </View>
       </View>
+    ))
+  )}
+</ScrollView>
+      </View>
+
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.button} onPress={()=> {navigation.navigate("AddReward")}} >
-          <Text style={styles.buttonText} >Adicionar recompensa</Text>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("AddReward", { gameId: gameId })}>
+          <Text style={styles.buttonText}>Adicionar recompensa</Text>
         </TouchableOpacity>
       </View>
     </View>
-
-
-  )
-};
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -231,7 +317,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   rewardsContainer: {
-    marginTop: 30,
+    marginTop: 5,
+    height: 260
   },
   reward: {
     backgroundColor: "#2B2B2C",
@@ -263,6 +350,7 @@ const styles = StyleSheet.create({
   rewardsContainerTitle: {
     color: "white",
     marginBottom: 14,
+    marginTop: 30
   },
 
   footer: {
@@ -284,7 +372,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600"
   },
-
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1B1B1E",
+  },
+  loadingText: {
+    color: "#fff",
+    fontSize: 18,
+  },
+  noRewardContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    paddingHorizontal: 15,
+  },
+  noRewardText: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '300',
+  },
 
 });
 
