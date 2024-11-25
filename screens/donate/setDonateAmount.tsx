@@ -74,15 +74,13 @@ const SetDonateAmount = ({ navigation, route}: Props) => {
         payerEmail: email,  // Agora passando o email
       });
   
-      const { initPoint } = response.data; // Recebendo o link do Mercado Pago
-      console.log(initPoint)
-  
-      if (initPoint) {
+      const { init_point } = response.data.result;
+      console.log(init_point)
+      if (init_point) {
         // Utilizando o Linking para abrir a URL
-        Linking.openURL(initPoint)
+        Linking.openURL(init_point)
           .catch(err => console.error('Erro ao abrir URL do Mercado Pago:', err));
       } else {
-        console.log(response.data);
         console.error('Erro ao criar a doação: não foi recebido o link de pagamento');
       }
     } catch (error) {
