@@ -1,10 +1,20 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StackScreenProps } from '@react-navigation/stack';
-import React, { useState, useEffect } from 'react';
-import { Feather, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { StatusBar, FlatList, StyleSheet, Text, View, Image, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
-import api from '../services/api';
-import { RootStackParamList } from '../navigation';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StackScreenProps } from "@react-navigation/stack";
+import React, { useState, useEffect } from "react";
+import { Feather, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import {
+  StatusBar,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  Animated,
+} from "react-native";
+import api from "../services/api";
+import { RootStackParamList } from "../navigation";
 
 interface Game {
   id: number;
@@ -30,7 +40,7 @@ interface InterestUser {
   };
 }
 
-type Props = StackScreenProps<RootStackParamList, 'FindGamer'>;
+type Props = StackScreenProps<RootStackParamList, "FindGamer">;
 
 const FindGamer = ({ navigation, route }: Props) => {
   const { gameId } = route.params;
@@ -39,15 +49,17 @@ const FindGamer = ({ navigation, route }: Props) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [noUsersMessage, setNoUsersMessage] = useState<string | null>(null);
-  const [sessionGameImage, setSessionGameImage] = useState<string | undefined>(undefined);
+  const [sessionGameImage, setSessionGameImage] = useState<string | undefined>(
+    undefined
+  );
   const [fadeAnim] = useState(new Animated.Value(1)); // Inicializa o valor da animação de fade
   const [topAnim] = useState(new Animated.Value(10));
   const defaultImageUrl =
-    'https://www.shutterstock.com/image-vector/profile-default-avatar-icon-user-600nw-2463844171.jpg';
+    "https://www.shutterstock.com/image-vector/profile-default-avatar-icon-user-600nw-2463844171.jpg";
 
   useEffect(() => {
     const getUserId = async () => {
-      const id = await AsyncStorage.getItem('userId');
+      const id = await AsyncStorage.getItem("userId");
       setUserId(id);
     };
     getUserId();
@@ -62,16 +74,18 @@ const FindGamer = ({ navigation, route }: Props) => {
       setSessionGameImage(gameImage);
 
       // Remove o usuário logado da lista
-      const filteredUsers = users.filter((user: InterestUser) => user.id !== Number(userId));
+      const filteredUsers = users.filter(
+        (user: InterestUser) => user.id !== Number(userId)
+      );
 
       if (filteredUsers.length === 0) {
-        setNoUsersMessage('Nenhum usuário encontrado que joga este jogo.');
+        setNoUsersMessage("Nenhum usuário encontrado que joga este jogo.");
       } else {
         setNoUsersMessage(null);
         setInterestUsers(filteredUsers); // Substitui a lista inteira de usuários
       }
     } catch (error) {
-      console.error('Erro ao buscar dados de interesse:', error);
+      console.error("Erro ao buscar dados de interesse:", error);
     } finally {
       setLoading(false);
     }
@@ -97,15 +111,17 @@ const FindGamer = ({ navigation, route }: Props) => {
         useNativeDriver: true, // Native driver
       }).start(() => {
         // Update the user index after the animation is completed
-        setCurrentIndex((prevIndex) => (prevIndex < interestUsers.length - 1 ? prevIndex + 1 : 0));
-  
+        setCurrentIndex((prevIndex) =>
+          prevIndex < interestUsers.length - 1 ? prevIndex + 1 : 0
+        );
+
         // After updating the index, animate back to the top and restore opacity
         Animated.timing(topAnim, {
           toValue: 0, // Move back to the original position
           duration: 50,
           useNativeDriver: true, // Native driver
         }).start();
-  
+
         Animated.timing(fadeAnim, {
           toValue: 1, // Restore opacity
           duration: 50,
@@ -116,7 +132,10 @@ const FindGamer = ({ navigation, route }: Props) => {
   };
 
   const renderUserGames = ({ item }: { item: GameUser }) => (
-    <Image source={{ uri: item.game.gameimageUrl || defaultImageUrl }} style={styles.gameImage} />
+    <Image
+      source={{ uri: item.game.gameimageUrl || defaultImageUrl }}
+      style={styles.gameImage}
+    />
   );
 
   return (
@@ -134,34 +153,43 @@ const FindGamer = ({ navigation, route }: Props) => {
           <View style={styles.gamerData}>
             <StatusBar barStyle="dark-content" backgroundColor="#121212" />
             <Animated.View
-                style={[
-                  styles.user,
-                  {
-                    opacity: fadeAnim, // Aplica animação de opacidade
-                    transform: [{ translateY: topAnim }], // Usa translateY em vez de top
-                  },
-                ]}
-              >
-
+              style={[
+                styles.user,
+                {
+                  opacity: fadeAnim, // Aplica animação de opacidade
+                  transform: [{ translateY: topAnim }], // Usa translateY em vez de top
+                },
+              ]}
+            >
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate('Profile', { profileUserId: String(interestUsers[currentIndex].id) })
+                  navigation.navigate("Profile", {
+                    profileUserId: String(interestUsers[currentIndex].id),
+                  })
                 }
                 style={styles.main}
               >
                 <Image
                   source={{
                     uri:
-                      interestUsers[currentIndex].profilePictureUrl === 'https://example.com/profile-picture.jpg'
+                      interestUsers[currentIndex].profilePictureUrl ===
+                      "https://example.com/profile-picture.jpg"
                         ? defaultImageUrl
                         : interestUsers[currentIndex].profilePictureUrl,
                   }}
                   style={styles.userImage}
                 />
                 <View style={styles.usernameContainer}>
-                  <Text style={styles.username}>{interestUsers[currentIndex].username}</Text>
+                  <Text style={styles.username}>
+                    {interestUsers[currentIndex].username}
+                  </Text>
                   {interestUsers[currentIndex].Subscription?.isActive && (
-                    <MaterialIcons name="verified" size={16} color="#FFC000" style={styles.verifiedIcon} />
+                    <MaterialIcons
+                      name="verified"
+                      size={16}
+                      color="#FFC000"
+                      style={styles.verifiedIcon}
+                    />
                   )}
                 </View>
               </TouchableOpacity>
@@ -176,17 +204,25 @@ const FindGamer = ({ navigation, route }: Props) => {
                 </View>
 
                 <View style={styles.bio}>
-                  <Text style={styles.bioText}>Procuro alguém pra jogar estou entrando em depressão</Text>
+                  <Text style={styles.bioText}>
+                    Procuro alguém pra jogar estou entrando em depressão
+                  </Text>
                 </View>
 
                 <View style={styles.sessionGame}>
                   <View style={styles.sessionGameImageContainer}>
-                    <Image
-                      source={{
-                        uri: sessionGameImage || defaultImageUrl,
-                      }}
-                      style={styles.sessionGameImage}
-                    />
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("GameProfile", { gameId })
+                      }
+                    >
+                      <Image
+                        source={{
+                          uri: sessionGameImage || defaultImageUrl,
+                        }}
+                        style={styles.sessionGameImage}
+                      />
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.gameDetails}>
                     <View style={styles.gameStyle}>
@@ -195,17 +231,24 @@ const FindGamer = ({ navigation, route }: Props) => {
                       <Text style={styles.gameStyleText}>Competitivo</Text>
                     </View>
                     <Text style={styles.gameBioText}>
-                      Jogo Fortnite há 3 anos e busco alguém pra jogar campeonato, sou fragger
+                      Jogo Fortnite há 3 anos e busco alguém pra jogar
+                      campeonato, sou fragger
                     </Text>
                   </View>
                 </View>
 
                 <View style={styles.userGames}>
-                  <Text style={styles.gamesTitle}>Outros jogos de @{interestUsers[currentIndex].username}</Text>
+                  <Text style={styles.gamesTitle}>
+                    Outros jogos de @{interestUsers[currentIndex].username}
+                  </Text>
                   <FlatList
                     data={interestUsers[currentIndex].GameUser}
                     renderItem={renderUserGames}
-                    keyExtractor={(item) => (item.gameId ? item.gameId.toString() : Math.random().toString())}
+                    keyExtractor={(item) =>
+                      item.gameId
+                        ? item.gameId.toString()
+                        : Math.random().toString()
+                    }
                     horizontal
                     style={styles.flatList}
                   />
@@ -214,7 +257,7 @@ const FindGamer = ({ navigation, route }: Props) => {
                 <TouchableOpacity
                   style={styles.invite}
                   onPress={() =>
-                    navigation.navigate('ChatWindow', {
+                    navigation.navigate("ChatWindow", {
                       receiverId: interestUsers[currentIndex].id,
                       receiverName: interestUsers[currentIndex].username,
                     })
@@ -225,7 +268,10 @@ const FindGamer = ({ navigation, route }: Props) => {
               </View>
             </Animated.View>
 
-            <TouchableOpacity style={styles.findAnotherButton} onPress={handleNextUser}>
+            <TouchableOpacity
+              style={styles.findAnotherButton}
+              onPress={handleNextUser}
+            >
               <FontAwesome5 name="dice" size={20} color="#FFF" />
               <Text style={styles.findAnotherButtonText}>Buscar</Text>
             </TouchableOpacity>
@@ -238,20 +284,20 @@ const FindGamer = ({ navigation, route }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
-    paddingTop: '10%',
-    justifyContent: "center"
+    backgroundColor: "#121212",
+    paddingTop: "10%",
+    justifyContent: "center",
   },
   centeredContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   gamerData: {
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     top: -50,
   },
   userImage: {
@@ -260,58 +306,56 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   username: {
-    color: 'white',
+    color: "white",
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   userInformations: {
-    backgroundColor: '#2B2B2C',
+    backgroundColor: "#2B2B2C",
     width: "80%",
     marginTop: 30,
     padding: 15,
     borderRadius: 10,
   },
   gamesText: {
-    color: 'white',
+    color: "white",
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   invite: {
     height: 40,
-    backgroundColor: '#10C700',
+    backgroundColor: "#10C700",
     borderRadius: 10,
     marginTop: 30,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   inviteText: {
-    color: 'white',
-    fontWeight: "700"
+    color: "white",
+    fontWeight: "700",
   },
   games: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 5,
     paddingVertical: 5,
-
   },
   gameImage: {
     width: 40,
     height: 40,
     borderRadius: 5,
     marginRight: 10,
-
   },
   noUsersText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 20,
   },
   usernameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 5,
     marginTop: 10,
   },
@@ -320,43 +364,43 @@ const styles = StyleSheet.create({
   },
 
   main: {
-    alignItems: "center"
+    alignItems: "center",
   },
   status: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 5,
   },
   circle: {
     width: 10,
     height: 10,
-    backgroundColor: '#36C929',
+    backgroundColor: "#36C929",
     borderRadius: 50,
     top: 1,
   },
   circle2: {
     width: 5,
     height: 5,
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     borderRadius: 50,
     top: 1,
   },
   statusText: {
-    color: 'white',
+    color: "white",
   },
   statusAndFollow: {
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   text: {
-    color: "white"
+    color: "white",
   },
   bio: {
-    marginTop: 10
+    marginTop: 10,
   },
   bioText: {
     color: "white",
-    fontSize: 13
+    fontSize: 13,
   },
   sessionGame: {
     marginTop: 15,
@@ -373,7 +417,7 @@ const styles = StyleSheet.create({
     width: "36%",
   },
   user: {
-    top: "10%"
+    top: "10%",
   },
   gameDetails: {
     alignItems: "center",
@@ -385,15 +429,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    gap: 5
+    gap: 5,
   },
   gameBioText: {
     width: "100%",
-    color: "white"
+    color: "white",
   },
   gameStyleText: {
     fontWeight: "bold",
-    color: "white"
+    color: "white",
   },
   userGames: {
     marginTop: 20,
@@ -401,11 +445,11 @@ const styles = StyleSheet.create({
   gamesTitle: {
     color: "white",
     fontSize: 14,
-    fontWeight: "500"
+    fontWeight: "500",
   },
   followText: {
     color: "white",
-    fontWeight: "600"
+    fontWeight: "600",
   },
   findAnotherButton: {
     backgroundColor: "#701EFF",
@@ -416,17 +460,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    flexDirection: "row"
+    flexDirection: "row",
   },
   findAnotherButtonText: {
     color: "white",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   flatList: {
     maxHeight: 40,
     marginTop: 10,
-  }
-
+  },
 });
 
 export default FindGamer;
