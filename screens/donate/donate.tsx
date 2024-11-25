@@ -125,7 +125,7 @@ const Donate = ({ navigation, route }: Props) => {
       <View style={styles.main}>
         <Text style={styles.text}>
           Você já contribuiu com{' '}
-          {totalDonated !== null ? `${totalDonated} reais 🔥` : 'carregando...'}
+          {totalDonated !== null ? `${totalDonated} reais` : 'carregando...'}
         </Text>
         <View style={styles.progressBarContainer}>
           <View

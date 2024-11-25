@@ -15,8 +15,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
+  BackHandler
 } from 'react-native';
-import {Feather} from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 
 import api from '../services/api';
 
@@ -24,6 +26,12 @@ import GoBackAlert from '../components/GoBackAlert';
 import { RootStackParamList } from '../navigation';
 
 type Props = StackScreenProps<RootStackParamList, 'EditPostInfo'>;
+interface Game {
+  id: number;
+  name: string;
+  gameimageUrl: string;
+  category: string;
+}
 
 const EditPostInfo = ({ navigation, route }: Props) => {
   const { photoUri, cameraType } = route.params;
@@ -35,13 +43,46 @@ const EditPostInfo = ({ navigation, route }: Props) => {
   const [caption, setCaption] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [postSubmitted, setPostSubmitted] = useState(false);
-
+  const [showMentionContainer, setShowMentionContainer] = useState<boolean>(false);
+  const [games, setGames] = useState<Game[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const videoRef = useRef<Video>(null);
   const isVideo = photoUri && photoUri.endsWith('.mp4');
   const imageStyle = isFrontCamera ? styles.invertedImagePreview : styles.imagePreview;
-
+  const [selectedGameId, setSelectedGameId] = useState<string | number | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  const handleBackPress = () => {
+    // Muda o estado para indicar que o botão de voltar foi pressionado
+    if(showMentionContainer){
+      console.log(showMentionContainer)
+      setShowMentionContainer(false);
+      return true
+    }else {
+      setShowMentionContainer(false);
+
+      return false; 
+
+    }
+
+    // Impede o comportamento padrão (não deixar voltar para a tela anterior)
+  };
+
+
+  useEffect(() => {
+    // Adiciona o ouvinte do botão de voltar quando o componente for montado
+    BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+
+    // Limpeza: remove o ouvinte quando o componente for desmontado
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+    };
+  }, []);
+
+  const handleGamePress = (gameId: string | number): void => { 
+    setSelectedGameId(gameId); // Atualiza o estado para o jogo selecionado
+  };
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -122,7 +163,26 @@ const EditPostInfo = ({ navigation, route }: Props) => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+
+  const fetchGames = async () => {
+    try {
+      const response = await api.get('/api/games');
+      console.log(response.data)
+      setGames(response.data)
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Erro ao buscar jogos:', error);
+      setIsLoading(false);
+
+    }
+  };
+
   const handleSubmitPost = async () => {
+    fetchGames();
+    setShowMentionContainer(true)
+  };
+
+  const submitPost = async () => {
     const formData = new FormData();
 
     if (userId !== null && userId !== undefined) {
@@ -133,6 +193,10 @@ const EditPostInfo = ({ navigation, route }: Props) => {
     }
 
     formData.append('content', caption);
+    if(selectedGameId) {
+      formData.append('gameId', selectedGameId.toString());
+
+    }
 
     if (photoUri) {
       const fileInfo = await FileSystem.getInfoAsync(photoUri);
@@ -192,11 +256,11 @@ const EditPostInfo = ({ navigation, route }: Props) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <View style={styles.container}>
-              <StatusBar barStyle="dark-content" backgroundColor="#121212" />
+      <StatusBar barStyle="dark-content" backgroundColor="#121212" />
 
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
@@ -250,8 +314,8 @@ const EditPostInfo = ({ navigation, route }: Props) => {
             multiline
           />
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleSubmitPost} disabled={isSubmitting}>
-          <Text style={styles.publishText}>{isSubmitting ? 'Enviando...' : 'Publicar'}</Text>
+        <TouchableOpacity style={styles.button} onPress={handleSubmitPost}>
+          <Text style={styles.publishText}>Publicar</Text>
         </TouchableOpacity>
 
         <GoBackAlert
@@ -261,6 +325,38 @@ const EditPostInfo = ({ navigation, route }: Props) => {
           onClose={() => setModalVisible(false)}
           onConfirm={handleConfirmExit}
         />
+
+        {showMentionContainer && (
+          <View style={styles.mentionContainer}>
+            <Text style={styles.mentionText} >Mencione algum jogo</Text>
+            <TouchableOpacity style={styles.searchBar}>
+              <Feather name="search" type="feather" size={20} color="#fff" />
+              <Text style={styles.searchTitle}>Pesquisar jogo</Text>
+            </TouchableOpacity>
+            <ScrollView style={styles.gamesContainer}>
+              {isLoading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+              ) : (
+                games.map((e) => (
+                  <TouchableOpacity key={e.id} onPress={() => handleGamePress(e.id)}>
+                    <View style={[styles.game, selectedGameId === e.id && styles.gameSelected]}>
+                      <Image
+                        source={{ uri: e.gameimageUrl }}
+                        style={styles.gameImage}
+                        onError={() => console.error('Erro ao carregar imagem do jogo')}
+                      />
+                      <Text style={styles.gameNameText}>{e.name}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+            <TouchableOpacity style={styles.shareButton} onPress={submitPost}>
+              <Text style={styles.shareText} >Compartilhar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
       </ScrollView>
     </View>
   );
@@ -301,14 +397,14 @@ const styles = StyleSheet.create({
   imagePreview: {
     width: "100%",
     height: "100%",
-    
+
     borderRadius: 10,
     resizeMode: 'cover',
   },
   invertedImagePreview: {
     width: "100%",
     height: "100%",
-    
+
     borderRadius: 10,
     resizeMode: 'cover',
     transform: [{ scaleX: -1 }],
@@ -339,12 +435,100 @@ const styles = StyleSheet.create({
     marginTop: 60,
     height: 50,
     alignSelf: "center"
-    
+
   },
   publishText: {
     color: "#529DFF",
     fontSize: 15,
     fontWeight: "500"
+  },
+  mentionContainer: {
+    position: "absolute",
+    width: 300,
+    height: 400,
+    backgroundColor: "#2B2B2C",
+    alignSelf: "center",
+    top: "50%",
+    transform: [{ translateY: -200 }],
+    borderRadius: 10,
+    alignItems: "center",
+    padding: 15,
+  },
+  mentionText: {
+    color: "white",
+    fontWeight: "700",
+    fontSize: 18
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 30,
+    paddingLeft: '3%',
+    paddingRight: '3%',
+  },
+  searchTitle: {
+    color: 'white',
+    fontSize: 14,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'flex-start',
+    marginTop: 14,
+    gap: 15
+  },
+  searchInput: {
+    color: 'white',
+    fontSize: 13,
+  },
+
+  gamesContainer: {
+    marginTop: 20,
+    width: "100%",
+    gap: 5,
+    height: "100%"
+  },
+  game: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    width: "100%",
+    padding: 5
+  },
+
+  gameSelected: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    width: "100%",
+    padding: 5,
+    backgroundColor: "#171717",
+    borderRadius: 10,
+
+  },
+  gameImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 50,
+  },
+  gameNameText: {
+    color: "white",
+    fontSize: 14
+  },
+  shareButton: {
+    top: 5,
+    // backgroundColor: "#5312C2",
+    width: "108%",
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+  },
+  shareText: {
+    color: "#29BFFF",
+    fontSize: 15,
+    fontWeight: "bold"
   }
 });
 
