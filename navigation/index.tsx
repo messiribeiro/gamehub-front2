@@ -64,10 +64,10 @@ export type RootStackParamList = {
   Dashboard: { from?: string };
   Payment: { type: string };
   MyGames: undefined;
-  Support: undefined;
+  Donate: { gameId: number };
   SetDonateAmount: undefined;
-  GameAnalytics: undefined;
-  AddReward: undefined;
+  GameAnalytics: { gameId: number };
+  AddReward: { gameId: number };
   Settings: undefined;
   AddGames: { userId: number | null };
   GameProfile: { gameId: number };
@@ -126,6 +126,11 @@ export default function RootStack({ linking }: RootStackProps) {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="AddGames"
+          component={AddGames}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="Profile"
           component={Profile}
           options={{ headerShown: false }}
@@ -133,11 +138,6 @@ export default function RootStack({ linking }: RootStackProps) {
         <Stack.Screen
           name="MyProfile"
           component={MyProfile}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="GameProfile"
-          component={GameProfile}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -206,6 +206,11 @@ export default function RootStack({ linking }: RootStackProps) {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="GameProfile"
+          component={GameProfile}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="Payment"
           component={Payment}
           options={{ headerShown: false }}
@@ -223,11 +228,6 @@ export default function RootStack({ linking }: RootStackProps) {
         <Stack.Screen
           name="MyGames"
           component={MyGames}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="AddGames"
-          component={AddGames}
           options={{ headerShown: false }}
         />
         <Stack.Screen
