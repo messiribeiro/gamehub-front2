@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -11,15 +11,15 @@ import {
   Easing,
   Dimensions,
   TouchableWithoutFeedback,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { StackScreenProps } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '@/services/api';
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { StackScreenProps } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "@/services/api";
 import GoBackAlert from "../components/GoBackAlert"; // Importando o alerta
 
-type Props = StackScreenProps<RootStackParamList, 'MyGames'>;
+type Props = StackScreenProps<RootStackParamList, "MyGames">;
 
 const MyGames = ({ navigation }: Props) => {
   const [games, setGames] = useState<any[]>([]);
@@ -29,17 +29,17 @@ const MyGames = ({ navigation }: Props) => {
   const [showAlert, setShowAlert] = useState(false); // Estado para controlar a visibilidade do alerta
 
   const optionsAnim = useRef(new Animated.Value(0)).current;
-  const screenHeight = Dimensions.get('window').height;
+  const screenHeight = Dimensions.get("window").height;
 
   useEffect(() => {
     const getUserId = async () => {
       try {
-        const storedUserId = await AsyncStorage.getItem('userId');
+        const storedUserId = await AsyncStorage.getItem("userId");
         if (storedUserId) {
           setUserId(Number(storedUserId));
         }
       } catch (error) {
-        console.error('Erro ao recuperar o userId do AsyncStorage:', error);
+        console.error("Erro ao recuperar o userId do AsyncStorage:", error);
       }
     };
 
@@ -55,7 +55,7 @@ const MyGames = ({ navigation }: Props) => {
           setGames(userGames);
           setLoading(false);
         } catch (error) {
-          console.error('Erro ao buscar os jogos:', error);
+          console.error("Erro ao buscar os jogos:", error);
           setLoading(false);
         }
       };
@@ -113,7 +113,10 @@ const MyGames = ({ navigation }: Props) => {
       <View style={styles.container}>
         <StatusBar backgroundColor="#1B1B1E" />
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
             <Feather name="arrow-left" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Dashboard</Text>
@@ -130,7 +133,10 @@ const MyGames = ({ navigation }: Props) => {
       <View style={styles.container}>
         <StatusBar backgroundColor="#1B1B1E" />
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
             <Feather name="arrow-left" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Meus Jogos</Text>
@@ -141,7 +147,9 @@ const MyGames = ({ navigation }: Props) => {
 
           {games.length === 0 ? (
             <View style={styles.noGamesContainer}>
-              <Text style={styles.noGamesText}>Você ainda não adicionou nenhum jogo ao seu perfil</Text>
+              <Text style={styles.noGamesText}>
+                Você ainda não adicionou nenhum jogo ao seu perfil
+              </Text>
             </View>
           ) : (
             <View style={styles.games}>
@@ -163,7 +171,11 @@ const MyGames = ({ navigation }: Props) => {
                   activeOpacity={0.7}
                 >
                   <View
-                    style={[styles.game, selectedGame && selectedGame !== game.game.id && { opacity: 0.3 }]}
+                    style={[
+                      styles.game,
+                      selectedGame &&
+                        selectedGame !== game.game.id && { opacity: 0.3 },
+                    ]}
                   >
                     <Image
                       source={{ uri: game.game.gameimageUrl }}
@@ -178,7 +190,10 @@ const MyGames = ({ navigation }: Props) => {
 
         {!selectedGame && (
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.addButton}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => navigation.navigate("AddGames", { userId })} // Navega para a tela de Adicionar Jogo
+            >
               <Feather name="plus" color="#FFF" size={25} />
             </TouchableOpacity>
           </View>
@@ -217,50 +232,50 @@ const MyGames = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B1B1E',
-    paddingTop: '5%',
+    backgroundColor: "#1B1B1E",
+    paddingTop: "5%",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 40,
   },
   backButton: {
-    position: 'absolute',
+    position: "absolute",
     left: 20,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
   },
   main: {
     paddingHorizontal: 25,
   },
   mainTitle: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   noGamesContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   noGamesText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '500',
-    textAlign: 'center',
+    fontWeight: "500",
+    textAlign: "center",
   },
   games: {
     marginTop: 20,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    maxWidth: '100%',
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    maxWidth: "100%",
   },
   game: {},
   gameImage: {
@@ -269,35 +284,35 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   footer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     right: 15,
   },
   addButton: {
     width: 60,
     height: 60,
-    backgroundColor: '#5312C2',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#5312C2",
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 20,
   },
   loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '75%',
+    justifyContent: "center",
+    alignItems: "center",
+    height: "75%",
   },
   options: {
     width: 160,
     height: 60,
-    backgroundColor: '#D4E5FF',
+    backgroundColor: "#D4E5FF",
     borderRadius: 20,
-    position: 'absolute',
-    alignSelf: 'center',
+    position: "absolute",
+    alignSelf: "center",
     bottom: 20,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
     padding: 10,
   },
 });

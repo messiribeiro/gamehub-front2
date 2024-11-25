@@ -1,15 +1,23 @@
 /* eslint-disable prettier/prettier */
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StackScreenProps } from '@react-navigation/stack';
-import TabMenu from '../components/TabMenu';
-import { Video, ResizeMode as VideoResizeMode } from 'expo-av';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
-import {MaterialIcons} from '@expo/vector-icons';
-import api from '../services/api';
-import { StatusBar } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StackScreenProps } from "@react-navigation/stack";
+import TabMenu from "../components/TabMenu";
+import { Video, ResizeMode as VideoResizeMode } from "expo-av";
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ActivityIndicator,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import api from "../services/api";
+import { StatusBar } from "react-native";
 
-import { RootStackParamList } from '../navigation';
+import { RootStackParamList } from "../navigation";
 
 interface UserData {
   id: number;
@@ -42,7 +50,7 @@ interface Post {
 }
 
 // Defining the type of props
-type Props = StackScreenProps<RootStackParamList, 'MyProfile'>;
+type Props = StackScreenProps<RootStackParamList, "MyProfile">;
 
 const MyProfile: React.FC<Props> = ({ navigation }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -59,9 +67,11 @@ const MyProfile: React.FC<Props> = ({ navigation }) => {
     setUserData(userResponse.data);
 
     // Fetch user stats
-    const statsResponse = await api.get(`api/friendships/stats/${profileUserId}`);
+    const statsResponse = await api.get(
+      `api/friendships/stats/${profileUserId}`
+    );
     setUserStats(statsResponse.data);
-    
+
     // Fetch user games
     const gamesResponse = await api.get(`api/games/user/${profileUserId}`);
     setUserGames(gamesResponse.data);
@@ -69,8 +79,8 @@ const MyProfile: React.FC<Props> = ({ navigation }) => {
     // Fetch user posts
     const postsResponse = await api.get(`api/post/user/${profileUserId}`);
     setPosts(postsResponse.data);
-    
-    setLoading(false); 
+
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -78,7 +88,7 @@ const MyProfile: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   const handleEditProfile = () => {
-    navigation.navigate('EditProfile', {profilePictureUri: null});
+    navigation.navigate("EditProfile", { profilePictureUri: null });
   };
 
   const handleRefresh = () => {
@@ -89,7 +99,7 @@ const MyProfile: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-                <StatusBar barStyle="dark-content" backgroundColor="#121212" />
+        <StatusBar barStyle="dark-content" backgroundColor="#121212" />
 
         <ActivityIndicator size="large" color="#FFFFFF" />
       </View>
@@ -97,7 +107,7 @@ const MyProfile: React.FC<Props> = ({ navigation }) => {
   }
 
   const renderPost = ({ item }: { item: Post }) => {
-    const isVideo = item.imageUrl.endsWith('.mp4');
+    const isVideo = item.imageUrl.endsWith(".mp4");
 
     return (
       <View style={styles.post}>
@@ -118,35 +128,59 @@ const MyProfile: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-              <StatusBar barStyle="dark-content" backgroundColor="#121212" />
+      <StatusBar barStyle="dark-content" backgroundColor="#121212" />
 
       <View style={styles.banner}>
-        <Image source={{ uri: "https://i.pinimg.com/originals/97/fd/40/97fd40b04ea88ae05c66332c64de4fa9.png" }} style={styles.bannerImage} />
+        <Image
+          source={{
+            uri: "https://i.pinimg.com/originals/97/fd/40/97fd40b04ea88ae05c66332c64de4fa9.png",
+          }}
+          style={styles.bannerImage}
+        />
       </View>
       <View style={styles.userProfileActionsView}>
         <View style={styles.userData}>
-          <Image source={{ uri: userData ? userData.profilePictureUrl : undefined }} style={styles.userImage} />
+          <Image
+            source={{ uri: userData ? userData.profilePictureUrl : undefined }}
+            style={styles.userImage}
+          />
           <View style={styles.usernameContainer}>
-            <Text style={styles.username}>@{userData ? userData.username : 'user'}</Text>
+            <Text style={styles.username}>
+              @{userData ? userData.username : "user"}
+            </Text>
             {userData?.Subscription?.isActive && (
-              <MaterialIcons name="verified" size={16} color="#FFC000" style={styles.verifiedIcon} />
+              <MaterialIcons
+                name="verified"
+                size={16}
+                color="#FFC000"
+                style={styles.verifiedIcon}
+              />
             )}
           </View>
         </View>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={handleEditProfile}
+          >
             <Text style={styles.text}>Editar</Text>
           </TouchableOpacity>
         </View>
       </View>
       <View style={styles.profileData}>
         <Text style={styles.bio}>
-          {userData?.bio ? userData.bio : "Clique em editar para adicionar um bio."}
+          {userData?.bio
+            ? userData.bio
+            : "Clique em editar para adicionar um bio."}
         </Text>
-        
+
         <View style={styles.followerInformation}>
-          <Text style={styles.followerText}>{userStats ? userStats.followingCount : 0} seguindo</Text>
-          <Text style={styles.followerText}>{userStats ? userStats.followersCount : 0} seguidores</Text>
+          <Text style={styles.followerText}>
+            {userStats ? userStats.followingCount : 0} seguindo
+          </Text>
+          <Text style={styles.followerText}>
+            {userStats ? userStats.followersCount : 0} seguidores
+          </Text>
           <Text style={styles.followerText}>{posts.length} Publicações</Text>
         </View>
         <View style={styles.line} />
@@ -162,11 +196,13 @@ const MyProfile: React.FC<Props> = ({ navigation }) => {
         refreshing={refreshing}
         onRefresh={handleRefresh}
       />
-      
+
       {posts.length === 0 && (
         <View style={styles.noPostsContainer}>
-        <Text style={styles.noPostsText}>Você ainda não fez uma publicação 😐</Text>
-      </View>
+          <Text style={styles.noPostsText}>
+            Você ainda não fez uma publicação 😐
+          </Text>
+        </View>
       )}
 
       <TabMenu navigation={navigation} />
@@ -177,11 +213,11 @@ const MyProfile: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
   },
   banner: {
-    width: '100%',
-    resizeMode: 'cover',
+    width: "100%",
+    resizeMode: "cover",
     height: "20%",
   },
   bannerImage: {
@@ -252,13 +288,13 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#121212',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#121212",
   },
   usernameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 5,
     marginTop: 5,
   },
@@ -267,41 +303,39 @@ const styles = StyleSheet.create({
   },
   // Styles for posts
   post: {
-    width: '31%',
+    width: "31%",
     margin: 5,
     aspectRatio: 1,
   },
   postImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 10,
-
   },
   video: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 10,
   },
   line: {
     height: 1,
-    backgroundColor: '#444',
+    backgroundColor: "#444",
     marginTop: 10,
   },
   flatList: {
     top: -8,
-
   },
   noPostsContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 20,
   },
   noPostsText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
     opacity: 0.4,
-    top: -230
+    top: -230,
   },
 });
 
